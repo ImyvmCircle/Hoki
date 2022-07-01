@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "hoki",
+  "version": "${version}",
+
+  "name": "Imyvm Hoki",
+  "description": "",
+  "authors": [
+    "YanWQ-monad"
+  ],
+  "contact": {
+    "sources": "https://github.com/ImyvmCircle/Hoki"
+  },
+
+  "license": "",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.imyvm.hoki.HokiMod"
+    ]
+  },
+
+  "depends": {
+    "fabricloader": ">=0.14.6",
+    "fabric": "*",
+    "minecraft": "~1.19",
+    "java": ">=17"
+  }
+}
