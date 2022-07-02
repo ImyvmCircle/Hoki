@@ -68,8 +68,9 @@ public class Option<T> {
 
     public void setValue(@Nullable T value) {
         if (this.value != value) {
+            T oldValue = this.value;
             this.value = value;
-            this.changeEvents.invoker().onChange(this, this.value, value);
+            this.changeEvents.invoker().onChange(this, oldValue, value);
         }
     }
 
