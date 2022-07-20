@@ -148,6 +148,7 @@ class NbtPersistentHelper {
         Function<Object, NbtElement> serializer,
         Function<NbtElement, Object> deserializer
     ) {
+        @SuppressWarnings("unchecked")
         private static <T> ValueType of(Function<T, NbtElement> serializer, Function<NbtElement, T> deserializer) {
             return new ValueType((obj) -> serializer.apply((T) obj), deserializer::apply);
         }
