@@ -66,15 +66,15 @@ class NbtPersistentHelper {
 
             String key = getKey(field);
             ValueType type = simpleTypes.get(field.getType());
-            if (type != null) {
-                NbtElement element = type.serializer.apply(rawValue);
-                if (element != null)
-                    nbt.put(key, element);
-            }
+
+            NbtElement element;
+            if (type != null)
+                element = type.serializer.apply(rawValue);
             else if (NbtPersistent.class.isAssignableFrom(field.getType()))
-                nbt.put(key, ((NbtPersistent) rawValue).serialize());
+                element = ((NbtPersistent) rawValue).serialize();
             else
                 throw new RuntimeException("Cannot serialize field \"" + field.getType().getName() + " " + field.getName() + "\", in class \"" + obj.getClass().getName() + "\"");
+            nbt.put(key, element);
         }
 
         return nbt;
