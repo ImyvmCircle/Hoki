@@ -18,8 +18,10 @@ public interface NbtPersistent {
     }
 
     default void deserialize(@Nullable NbtElement element) {
-        assert element instanceof NbtCompound;
-        NbtPersistentHelper.deserialize(this, (NbtCompound) element);
+        if (element != null) {
+            assert element instanceof NbtCompound;
+            NbtPersistentHelper.deserialize(this, (NbtCompound) element);
+        }
     }
 }
 
@@ -96,13 +98,11 @@ class NbtPersistentHelper {
                 }
                 ((NbtPersistent) value).deserialize(element);
             }
-            else if (element == null)
-                fieldSet(field, obj, null);
-            else if (type != null) {
+            else if (element != null && type != null) {
                 Object value = type.deserializer.apply(element);
                 fieldSet(field, obj, value);
             }
-            else
+            else if (element != null)
                 throw new RuntimeException("Cannot deserialize field \"" + field.getType().getName() + " " + field.getName() + "\", in class \"" + obj.getClass().getName() + "\"");
         }
     }
