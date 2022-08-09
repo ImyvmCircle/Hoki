@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.imyvm.hoki.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "EntitySelectorAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
