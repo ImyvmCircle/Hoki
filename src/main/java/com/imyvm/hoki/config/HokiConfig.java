@@ -8,7 +8,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
@@ -18,7 +21,15 @@ public abstract class HokiConfig {
 
     public HokiConfig(@NotNull String filename) {
         this.filename = filename;
-        this.configFile = FabricLoader.getInstance().getConfigDir().resolve(this.filename).toFile();
+
+        Path path = FabricLoader.getInstance().getConfigDir().resolve(this.filename);
+        this.configFile = path.toFile();
+
+        try {
+            Files.createDirectories(path.getParent());
+        } catch (IOException e) {
+            throw new RuntimeException("Cannot create directory " + path, e);
+        }
     }
 
     public void loadAndSave() {
