@@ -6,6 +6,7 @@ import net.minecraft.text.Text;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+// CHECKSTYLE SUPPRESS: HideUtilityClassConstructor
 public class HokiTranslator {
     private static final String FORMAT_PLACEHOLDER = "(?<!\\{)\\{(\\d+)}";
     private static final Pattern FORMAT_PATTERN = Pattern.compile(FORMAT_PLACEHOLDER);

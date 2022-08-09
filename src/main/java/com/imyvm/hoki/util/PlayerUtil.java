@@ -22,7 +22,8 @@ public class PlayerUtil {
     }
 
     @Nullable
-    public static GameProfile lookupOfflinePlayerFromArgument(@NotNull CommandContext<ServerCommandSource> context, @NotNull String name) {
+    public static GameProfile lookupOfflinePlayerFromArgument(@NotNull CommandContext<ServerCommandSource> context,
+                                                              @NotNull String name) {
         EntitySelector selector = context.getArgument(name, EntitySelector.class);
         String playerName = ((EntitySelectorAccessor) selector).getPlayerName();
         if (playerName == null)
@@ -38,20 +39,21 @@ public class PlayerUtil {
     public static CompletableFuture<GameProfile> lookupOfflinePlayer(@NotNull String name) {
         CompletableFuture<GameProfile> future = new CompletableFuture<>();
 
-        SERVER.getGameProfileRepo().findProfilesByNames(new String[]{name}, Agent.MINECRAFT, new ProfileLookupCallback() {
-            @Override
-            public void onProfileLookupSucceeded(GameProfile profile) {
-                future.complete(profile);
-            }
+        SERVER.getGameProfileRepo().findProfilesByNames(new String[]{name}, Agent.MINECRAFT,
+            new ProfileLookupCallback() {
+                @Override
+                public void onProfileLookupSucceeded(GameProfile profile) {
+                    future.complete(profile);
+                }
 
-            @Override
-            public void onProfileLookupFailed(GameProfile profile, Exception exception) {
-                if (exception instanceof ProfileNotFoundException)
-                    future.complete(null);
-                else
-                    future.completeExceptionally(exception);
-            }
-        });
+                @Override
+                public void onProfileLookupFailed(GameProfile profile, Exception exception) {
+                    if (exception instanceof ProfileNotFoundException)
+                        future.complete(null);
+                    else
+                        future.completeExceptionally(exception);
+                }
+            });
 
         return future;
     }

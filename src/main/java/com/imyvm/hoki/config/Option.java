@@ -1,6 +1,6 @@
 package com.imyvm.hoki.config;
 
-import com.typesafe.config.*;
+import com.typesafe.config.*;  // CHECKSTYLE SUPPRESS: AvoidStarImport
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 import org.jetbrains.annotations.NotNull;
@@ -21,13 +21,17 @@ public class Option<T> {
     @NotNull private final BiFunction<Config, String, T> deserializer;
     @NotNull private final Function<T, ConfigValue> serializer;
 
-    @NotNull public final Event<OptionChangeCallback<T>> changeEvents = EventFactory.createArrayBacked(OptionChangeCallback.class,
-        (listeners) -> (option, oldValue, newValue) -> {
-            for (OptionChangeCallback<T> listener : listeners)
-                listener.onChange(option, oldValue, newValue);
-        });
+    // CHECKSTYLE SUPPRESS: DeclarationOrder
+    @NotNull public final Event<OptionChangeCallback<T>> changeEvents =
+        EventFactory.createArrayBacked(
+            OptionChangeCallback.class,
+            (listeners) -> (option, oldValue, newValue) -> {
+                for (OptionChangeCallback<T> listener : listeners)
+                    listener.onChange(option, oldValue, newValue);
+            });
 
-    public Option(@NotNull String key, @NotNull T defaultValue, @Nullable String comment, @NotNull BiFunction<Config, String, T> deserializer, @NotNull Function<T, ConfigValue> serializer) {
+    public Option(@NotNull String key, @NotNull T defaultValue, @Nullable String comment,
+                  @NotNull BiFunction<Config, String, T> deserializer, @NotNull Function<T, ConfigValue> serializer) {
         this.key = key;
         this.defaultValue = defaultValue;
         this.comments = comment == null ? null : Arrays.asList(comment.split("\n"));
@@ -35,7 +39,8 @@ public class Option<T> {
         this.serializer = serializer;
     }
 
-    public Option(@NotNull String key, @NotNull T defaultValue, @Nullable String comment, @NotNull BiFunction<Config, String, T> deserializer) {
+    public Option(@NotNull String key, @NotNull T defaultValue, @Nullable String comment,
+                  @NotNull BiFunction<Config, String, T> deserializer) {
         this(key, defaultValue, comment, deserializer, ConfigValueFactory::fromAnyRef);
     }
 

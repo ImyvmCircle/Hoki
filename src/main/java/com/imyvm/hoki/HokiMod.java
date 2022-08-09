@@ -7,12 +7,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class HokiMod implements ModInitializer {
-	public static final Logger LOGGER = LoggerFactory.getLogger("Hoki");
+    public static final Logger LOGGER = LoggerFactory.getLogger("Hoki");
 
-	@Override
-	public void onInitialize() {
-		ServerLifecycleEvents.SERVER_STARTING.register(PlayerUtil::initialize);
+    @Override
+    public void onInitialize() {
+        ServerLifecycleEvents.SERVER_STARTING.register(PlayerUtil::initialize);
 
-		LOGGER.info("Hoki mod initialize");
-	}
+        LOGGER.info("Hoki mod initialize");
+    }
 }

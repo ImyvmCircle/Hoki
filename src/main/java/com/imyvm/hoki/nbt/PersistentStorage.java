@@ -25,13 +25,13 @@ public class PersistentStorage<T extends NbtPersistent> {
         this.basePath = getBasePath(directoryName);
         this.defaultConstructor = defaultConstructor;
 
-        ServerLifecycleEvents.SERVER_STOPPED.register(server -> saveAll());
+        ServerLifecycleEvents.SERVER_STOPPED.register(server -> this.saveAll());
     }
 
     public void saveAll() {
         this.loadedData.forEach((uuid, data) -> {
             NbtCompound nbt = (NbtCompound) data.serialize();
-            File file = getDataFile(uuid);
+            File file = this.getDataFile(uuid);
 
             try {
                 NbtIo.writeCompressed(nbt, file);
@@ -43,19 +43,19 @@ public class PersistentStorage<T extends NbtPersistent> {
 
     public T getOrCreate(UUID uuid) {
         T data;
-        if ((data = loadedData.get(uuid)) != null)
+        if ((data = this.loadedData.get(uuid)) != null)
             return data;
 
-        data = loadDataFromDisk(uuid);
+        data = this.loadDataFromDisk(uuid);
         if (data == null)
             data = this.defaultConstructor.apply(uuid);
-        loadedData.put(uuid, data);
+        this.loadedData.put(uuid, data);
 
         return data;
     }
 
     private T loadDataFromDisk(UUID uuid) {
-        File file = getDataFile(uuid);
+        File file = this.getDataFile(uuid);
         if (!file.exists())
             return null;
 
