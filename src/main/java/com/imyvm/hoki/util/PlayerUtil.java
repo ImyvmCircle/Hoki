@@ -1,7 +1,6 @@
 package com.imyvm.hoki.util;
 
 import com.imyvm.hoki.mixin.EntitySelectorAccessor;
-import com.mojang.authlib.Agent;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.ProfileLookupCallback;
 import com.mojang.authlib.yggdrasil.ProfileNotFoundException;
@@ -39,7 +38,7 @@ public class PlayerUtil {
     public static CompletableFuture<GameProfile> lookupOfflinePlayer(@NotNull String name) {
         CompletableFuture<GameProfile> future = new CompletableFuture<>();
 
-        SERVER.getGameProfileRepo().findProfilesByNames(new String[]{name}, Agent.MINECRAFT,
+        SERVER.getGameProfileRepo().findProfilesByNames(new String[]{name},
             new ProfileLookupCallback() {
                 @Override
                 public void onProfileLookupSucceeded(GameProfile profile) {
@@ -47,7 +46,7 @@ public class PlayerUtil {
                 }
 
                 @Override
-                public void onProfileLookupFailed(GameProfile profile, Exception exception) {
+                public void onProfileLookupFailed(String profileName, Exception exception) {
                     if (exception instanceof ProfileNotFoundException)
                         future.complete(null);
                     else

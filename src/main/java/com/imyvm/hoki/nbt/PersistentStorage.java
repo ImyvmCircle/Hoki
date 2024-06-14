@@ -4,8 +4,8 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.NbtSizeTracker;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,10 +31,10 @@ public class PersistentStorage<T extends NbtPersistent> {
     public void saveAll() {
         this.loadedData.forEach((uuid, data) -> {
             NbtCompound nbt = (NbtCompound) data.serialize();
-            File file = this.getDataFile(uuid);
+            Path path = this.getDataFile(uuid);
 
             try {
-                NbtIo.writeCompressed(nbt, file);
+                NbtIo.writeCompressed(nbt, path);
             } catch (IOException e) {
                 LOGGER.error("Error while saving data", e);
             }
@@ -55,13 +55,13 @@ public class PersistentStorage<T extends NbtPersistent> {
     }
 
     private T loadDataFromDisk(UUID uuid) {
-        File file = this.getDataFile(uuid);
-        if (!file.exists())
+        Path path = this.getDataFile(uuid);
+        if (!path.toFile().exists())
             return null;
 
         T data = this.defaultConstructor.apply(uuid);
         try {
-            NbtCompound nbt = NbtIo.readCompressed(file);
+            NbtCompound nbt = NbtIo.readCompressed(path, NbtSizeTracker.ofUnlimitedBytes());
             data.deserialize(nbt);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -70,8 +70,8 @@ public class PersistentStorage<T extends NbtPersistent> {
         return data;
     }
 
-    private File getDataFile(UUID uuid) {
-        return this.basePath.resolve(uuid.toString() + ".dat").toFile();
+    private Path getDataFile(UUID uuid) {
+        return this.basePath.resolve(uuid.toString() + ".dat");
     }
 
     private static Path getBasePath(String directoryName) {
