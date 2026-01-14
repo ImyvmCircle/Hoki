@@ -1,6 +1,7 @@
 package com.imyvm.hoki.nbt;
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
@@ -24,6 +25,8 @@ public class PersistentStorage<T extends NbtPersistent> {
     public PersistentStorage(String directoryName, Function<UUID, T> defaultConstructor) {
         this.basePath = getBasePath(directoryName);
         this.defaultConstructor = defaultConstructor;
+
+        ServerLifecycleEvents.AFTER_SAVE.register((server, flush, force) -> this.saveAll());
 
         ServerLifecycleEvents.SERVER_STOPPED.register(server -> this.saveAll());
     }
