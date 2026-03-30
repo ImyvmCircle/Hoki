@@ -1,7 +1,7 @@
 package com.imyvm.hoki.nbt;
 
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtString;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.Nullable;
 
 public class NbtEnumValue<T extends Enum<T>> implements NbtPersistent {
@@ -14,13 +14,13 @@ public class NbtEnumValue<T extends Enum<T>> implements NbtPersistent {
 
     @Override
     @Nullable
-    public NbtElement serialize() {
-        return this.value == null ? null : NbtString.of(this.value.toString());
+    public Tag serialize() {
+        return this.value == null ? null : StringTag.valueOf(this.value.toString());
     }
 
     @Override
-    public void deserialize(@Nullable NbtElement element) {
-        this.value = element == null ? null : Enum.valueOf(this.type, element.asString());
+    public void deserialize(@Nullable Tag element) {
+        this.value = element == null ? null : Enum.valueOf(this.type, ((StringTag) element).value());
     }
 
     public T get() {

@@ -1,11 +1,10 @@
 package com.imyvm.hoki.nbt;
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
-import net.minecraft.nbt.NbtSizeTracker;
+import net.minecraft.nbt.NbtAccounter;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -33,7 +32,7 @@ public class PersistentStorage<T extends NbtPersistent> {
 
     public void saveAll() {
         this.loadedData.forEach((uuid, data) -> {
-            NbtCompound nbt = (NbtCompound) data.serialize();
+            CompoundTag nbt = (CompoundTag) data.serialize();
             Path path = this.getDataFile(uuid);
 
             try {
@@ -64,7 +63,7 @@ public class PersistentStorage<T extends NbtPersistent> {
 
         T data = this.defaultConstructor.apply(uuid);
         try {
-            NbtCompound nbt = NbtIo.readCompressed(path, NbtSizeTracker.ofUnlimitedBytes());
+            CompoundTag nbt = NbtIo.readCompressed(path, NbtAccounter.unlimitedHeap());
             data.deserialize(nbt);
         } catch (IOException e) {
             throw new RuntimeException(e);

@@ -1,7 +1,8 @@
 package com.imyvm.hoki.nbt;
 
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.nbt.*;
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.nbt.*;  // CHECKSTYLE SUPPRESS: AvoidStarImport
 import org.apache.logging.log4j.util.TriConsumer;
 
 import java.lang.reflect.Field;
@@ -24,26 +25,27 @@ class NbtPersistentHelper {
             map.put(primitive, valueType);
             map.put(wrapper, valueType);
         };
-        putPrimitiveType.accept(byte.class, Byte.class, ValueType.of(NbtByte::of, (element) -> ((AbstractNbtNumber) element).byteValue()));
-        putPrimitiveType.accept(short.class, Short.class, ValueType.of(NbtShort::of, (element) -> ((AbstractNbtNumber) element).shortValue()));
-        putPrimitiveType.accept(char.class, Character.class, ValueType.of((c) -> NbtShort.of((short) (char) c), (element) -> (char) ((AbstractNbtNumber) element).shortValue()));
-        putPrimitiveType.accept(int.class, Integer.class, ValueType.of(NbtInt::of, (element) -> ((AbstractNbtNumber) element).intValue()));
-        putPrimitiveType.accept(long.class, Long.class, ValueType.of(NbtLong::of, (element) -> ((AbstractNbtNumber) element).longValue()));
-        putPrimitiveType.accept(float.class, Float.class, ValueType.of(NbtFloat::of, (element) -> ((AbstractNbtNumber) element).floatValue()));
-        putPrimitiveType.accept(double.class, Double.class, ValueType.of(NbtDouble::of, (element) -> ((AbstractNbtNumber) element).doubleValue()));
-        putPrimitiveType.accept(boolean.class, Boolean.class, ValueType.of(NbtByte::of, (element) -> ((AbstractNbtNumber) element).byteValue() != 0));
+        putPrimitiveType.accept(byte.class, Byte.class, ValueType.of(ByteTag::valueOf, (element) -> ((NumericTag) element).byteValue()));
+        putPrimitiveType.accept(short.class, Short.class, ValueType.of(ShortTag::valueOf, (element) -> ((NumericTag) element).shortValue()));
+        putPrimitiveType.accept(char.class, Character.class, ValueType.of((c) -> ShortTag.valueOf((short) (char) c), (element) -> (char) ((NumericTag) element).shortValue()));
+        putPrimitiveType.accept(int.class, Integer.class, ValueType.of(IntTag::valueOf, (element) -> ((NumericTag) element).intValue()));
+        putPrimitiveType.accept(long.class, Long.class, ValueType.of(LongTag::valueOf, (element) -> ((NumericTag) element).longValue()));
+        putPrimitiveType.accept(float.class, Float.class, ValueType.of(FloatTag::valueOf, (element) -> ((NumericTag) element).floatValue()));
+        putPrimitiveType.accept(double.class, Double.class, ValueType.of(DoubleTag::valueOf, (element) -> ((NumericTag) element).doubleValue()));
+        putPrimitiveType.accept(boolean.class, Boolean.class, ValueType.of(ByteTag::valueOf, (element) -> ((NumericTag) element).byteValue() != 0));
 
-        map.put(String.class, ValueType.of(NbtString::of, NbtElement::asString));
-        map.put(UUID.class, ValueType.of(NbtHelper::fromUuid, NbtHelper::toUuid));
-        map.put(int[].class, ValueType.of(NbtIntArray::new, (element) -> ((NbtIntArray) element).getIntArray()));
-        map.put(long[].class, ValueType.of(NbtLongArray::new, (element) -> ((NbtLongArray) element).getLongArray()));
-        map.put(byte[].class, ValueType.of(NbtByteArray::new, (element) -> ((NbtByteArray) element).getByteArray()));
+        map.put(String.class, ValueType.of(StringTag::valueOf, tag -> ((StringTag) tag).value()));
+        map.put(UUID.class, ValueType.of(uuid -> new IntArrayTag(UUIDUtil.uuidToIntArray((UUID) uuid)),
+            tag -> UUIDUtil.uuidFromIntArray(((IntArrayTag) tag).getAsIntArray())));
+        map.put(int[].class, ValueType.of(IntArrayTag::new, (element) -> ((IntArrayTag) element).getAsIntArray()));
+        map.put(long[].class, ValueType.of(LongArrayTag::new, (element) -> ((LongArrayTag) element).getAsLongArray()));
+        map.put(byte[].class, ValueType.of(ByteArrayTag::new, (element) -> ((ByteArrayTag) element).getAsByteArray()));
 
         return map.build();
     }
 
-    public static NbtCompound serialize(NbtPersistent obj) {
-        NbtCompound nbt = new NbtCompound();
+    public static CompoundTag serialize(NbtPersistent obj) {
+        CompoundTag nbt = new CompoundTag();
 
         for (Field field : obj.getClass().getDeclaredFields()) {
             if (!field.isAnnotationPresent(NbtPersistentValue.class))
@@ -56,7 +58,7 @@ class NbtPersistentHelper {
             String key = getKey(field);
             ValueType type = simpleTypes.get(field.getType());
 
-            NbtElement element;
+            Tag element;
             if (type != null)
                 element = type.serializer.apply(rawValue);
             else if (NbtPersistent.class.isAssignableFrom(field.getType()))
@@ -70,13 +72,13 @@ class NbtPersistentHelper {
         return nbt;
     }
 
-    public static void deserialize(NbtPersistent obj, NbtCompound nbt) {
+    public static void deserialize(NbtPersistent obj, CompoundTag nbt) {
         for (Field field : obj.getClass().getDeclaredFields()) {
             if (!field.isAnnotationPresent(NbtPersistentValue.class))
                 continue;
 
             String key = getKey(field);
-            NbtElement element = nbt.get(key);
+            Tag element = nbt.get(key);
             ValueType type = simpleTypes.get(field.getType());
             if (NbtPersistent.class.isAssignableFrom(field.getType())) {
                 Object value = fieldGet(field, obj);
@@ -134,11 +136,11 @@ class NbtPersistentHelper {
     }
 
     private record ValueType(
-        Function<Object, NbtElement> serializer,
-        Function<NbtElement, Object> deserializer
+        Function<Object, Tag> serializer,
+        Function<Tag, Object> deserializer
     ) {
         @SuppressWarnings("unchecked")
-        private static <T> ValueType of(Function<T, NbtElement> serializer, Function<NbtElement, T> deserializer) {
+        private static <T> ValueType of(Function<T, Tag> serializer, Function<Tag, T> deserializer) {
             return new ValueType((obj) -> serializer.apply((T) obj), deserializer::apply);
         }
     }

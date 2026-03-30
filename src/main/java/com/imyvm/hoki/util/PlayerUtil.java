@@ -1,16 +1,16 @@
 package com.imyvm.hoki.util;
 
 import com.imyvm.hoki.mixin.EntitySelectorAccessor;
+import com.imyvm.hoki.mixin.MinecraftServerAccessor;
 import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.ProfileLookupCallback;
-import com.mojang.authlib.yggdrasil.ProfileNotFoundException;
 import com.mojang.brigadier.context.CommandContext;
-import net.minecraft.command.EntitySelector;
+import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandSourceStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -21,7 +21,7 @@ public class PlayerUtil {
     }
 
     @Nullable
-    public static GameProfile lookupOfflinePlayerFromArgument(@NotNull CommandContext<ServerCommandSource> context,
+    public static GameProfile lookupOfflinePlayerFromArgument(@NotNull CommandContext<CommandSourceStack> context,
                                                               @NotNull String name) {
         EntitySelector selector = context.getArgument(name, EntitySelector.class);
         String playerName = ((EntitySelectorAccessor) selector).getPlayerName();
@@ -36,25 +36,11 @@ public class PlayerUtil {
     }
 
     public static CompletableFuture<GameProfile> lookupOfflinePlayer(@NotNull String name) {
-        CompletableFuture<GameProfile> future = new CompletableFuture<>();
-
-        SERVER.getGameProfileRepo().findProfilesByNames(new String[]{name},
-            new ProfileLookupCallback() {
-                @Override
-                public void onProfileLookupSucceeded(GameProfile profile) {
-                    future.complete(profile);
-                }
-
-                @Override
-                public void onProfileLookupFailed(String profileName, Exception exception) {
-                    if (exception instanceof ProfileNotFoundException)
-                        future.complete(null);
-                    else
-                        future.completeExceptionally(exception);
-                }
-            });
-
-        return future;
+        return CompletableFuture.supplyAsync(() -> {
+            Optional<GameProfile> profile = ((MinecraftServerAccessor) SERVER).getServices()
+                .profileResolver().fetchByName(name);
+            return profile.orElse(null);
+        });
     }
 
     public static void initialize(MinecraftServer server) {

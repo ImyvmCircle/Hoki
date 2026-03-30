@@ -1,19 +1,19 @@
 package com.imyvm.hoki.nbt;
 
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.Nullable;
 
 public interface NbtPersistent {
     @Nullable
-    default NbtElement serialize() {
+    default Tag serialize() {
         return NbtPersistentHelper.serialize(this);
     }
 
-    default void deserialize(@Nullable NbtElement element) {
+    default void deserialize(@Nullable Tag element) {
         if (element != null) {
-            assert element instanceof NbtCompound;
-            NbtPersistentHelper.deserialize(this, (NbtCompound) element);
+            assert element instanceof CompoundTag;
+            NbtPersistentHelper.deserialize(this, (CompoundTag) element);
         }
     }
 }

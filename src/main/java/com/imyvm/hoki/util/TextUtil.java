@@ -1,15 +1,15 @@
 package com.imyvm.hoki.util;
 
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 
 public class TextUtil {
     private TextUtil() {
     }
 
-    public static Text concat(Text... texts) {
-        MutableText result = Text.empty();
-        for (Text text : texts)
+    public static Component concat(Component... texts) {
+        MutableComponent result = Component.empty();
+        for (Component text : texts)
             result.append(text);
         return result;
     }
