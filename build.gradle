@@ -1,70 +1,71 @@
 plugins {
-id 'net.fabricmc.fabric-loom' version "${loom_version}"
-id 'maven-publish'
+    id 'net.fabricmc.fabric-loom' version "${loom_version}"
+    id 'maven-publish'
 }
 
 version = project.mod_version
 group = project.maven_group
 
 repositories {
+
 }
 
 dependencies {
-minecraft "com.mojang:minecraft:${project.minecraft_version}"
-implementation "net.fabricmc:fabric-loader:${project.loader_version}"
-implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-implementation include("com.typesafe:config:${project.typesafe_version}")
+    implementation include("com.typesafe:config:${project.typesafe_version}")
 }
 
 processResources {
-inputs.property "version", project.version
+    inputs.property "version", project.version
 
-filesMatching("fabric.mod.json") {
-expand "version": project.version
-}
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
 }
 
 tasks.withType(JavaCompile).configureEach {
-it.options.release = 25
+    it.options.release = 25
 }
 
 java {
-toolchain {
-languageVersion = JavaLanguageVersion.of(25)
-}
-withSourcesJar()
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+    withSourcesJar()
 }
 
 jar {
-from("LICENSE") {
-rename { "${it}_${project.archivesBaseName}"}
-}
+    from("LICENSE") {
+        rename { "${it}_${project.archivesBaseName}"}
+    }
 }
 
 publishing {
-publications {
-mavenJava(MavenPublication) {
-from components.java
-}
-}
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
 
-repositories {
-maven {
-name = "GitHubPackages"
-url = "https://maven.pkg.github.com/ImyvmCircle/Hoki"
-credentials {
-username = System.getenv("GITHUB_ACTOR")
-password = System.getenv("GITHUB_TOKEN")
-}
-}
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = "https://maven.pkg.github.com/ImyvmCircle/Hoki"
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
 
-maven {
-url = 's3://imyvm-maven-repository'
-credentials(AwsCredentials) {
-accessKey = System.getenv("S3_ACCESS_KEY_ID")
-secretKey = System.getenv("S3_SECRET_ACCESS_KEY")
-}
-}
-}
+        maven {
+            url = 's3://imyvm-maven-repository'
+            credentials(AwsCredentials) {
+            accessKey = System.getenv("S3_ACCESS_KEY_ID")
+            secretKey = System.getenv("S3_SECRET_ACCESS_KEY")
+            }
+        }
+    }
 }
